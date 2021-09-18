@@ -15,7 +15,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
 
-class CardGameRoutesTest extends AnyWordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
+class CardGameRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
 
   lazy val testKit: ActorTestKit = ActorTestKit()
   implicit def typedSystem: ActorSystem[Nothing] = testKit.system

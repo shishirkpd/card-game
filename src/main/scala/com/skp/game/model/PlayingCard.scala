@@ -1,7 +1,7 @@
 package com.skp.game.model
 
 
-object  PlayingCard {
+object PlayingCard {
   sealed trait Suit
 
   object Suit {
@@ -16,17 +16,27 @@ object  PlayingCard {
     val all = List(Diamond, Spade, Club, Heart)
   }
 
-  sealed trait Card
+  case class NumberCard(number: String, suit: Suit)
 
-  case class NumberCard(number: String, suit: Suit) extends Card
-
-  def faceCard(str: String): List[Card] = (for {
+  def faceCard(str: String): List[NumberCard] = for {
     suit <- Suit.all
-  } yield NumberCard(str, suit))
+  } yield NumberCard(str, suit)
 
-  val deck: List[Card] = faceCard("A") ::: faceCard("K") :::  faceCard("Q") :::
+  val deck: List[NumberCard] = faceCard("A") ::: faceCard("K") :::  faceCard("Q") :::
     faceCard("J") :::(for {
     suit <- Suit.all
     number <- 2 to 10
   } yield NumberCard(number.toString, suit))
+
+  def isBigger(c1: NumberCard, c2: NumberCard): Boolean = (c1.number, c2.number) match {
+    case ("A", _) => true
+    case ("K", "A") => false
+    case ("K", _) => true
+    case ("Q", "A" | "K") => false
+    case ("Q", _) => true
+    case ("J", "A" | "K" | "Q") => false
+    case ("J", _) => true
+    case (_, "A" | "K" | "Q" | "J") => false
+    case (x, y)  => x.toInt > y.toInt
+  }
 }
