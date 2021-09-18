@@ -11,7 +11,7 @@ import com.skp.game.model.{ActionPerformed, User, UserResponse}
 
 import scala.concurrent.Future
 
-case class AppRoutes(gameActor: ActorRef[CardGameActor.Command])(implicit val system: ActorSystem[_]) {
+case class CardGameRoutes(gameActor: ActorRef[CardGameActor.Command])(implicit val system: ActorSystem[_]) {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   import com.skp.game.utils.JsonFormats._

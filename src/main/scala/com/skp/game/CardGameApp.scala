@@ -33,7 +33,7 @@ object CardGameApp {
       val cardGameActor = context.spawn(CardGameActor(userService), "CardGameActor")
       context.watch(cardGameActor)
 
-      val routes = new AppRoutes(cardGameActor)(context.system)
+      val routes = new CardGameRoutes(cardGameActor)(context.system)
       startHttpServer(routes.appRoutes)(context.system)
 
       Behaviors.empty
