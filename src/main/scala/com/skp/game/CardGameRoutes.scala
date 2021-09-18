@@ -5,14 +5,13 @@ import akka.actor.typed._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.OnSuccessMagnet
 import akka.util.Timeout
-import com.skp.game.CardGameActor._
+import com.skp.game.actors.{Command, CreateUser, GetUser, Play}
 import com.skp.game.model.{ActionPerformed, User, UserResponse}
 
 import scala.concurrent.Future
 
-case class CardGameRoutes(gameActor: ActorRef[CardGameActor.Command])(implicit val system: ActorSystem[_]) {
+case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: ActorSystem[_]) {
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   import com.skp.game.utils.JsonFormats._

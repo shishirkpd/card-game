@@ -4,6 +4,7 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
+import com.skp.game.actors.{CardGameActor, OneCardGameActor}
 import com.skp.game.service.UserServiceImpl
 import com.softwaremill.macwire.wire
 
@@ -28,7 +29,9 @@ object CardGameApp {
   def main(args: Array[String]): Unit = {
     val userService = wire[UserServiceImpl]
     val rootBehavior = Behaviors.setup[Nothing] { context =>
-      val cardGameActor = context.spawn(CardGameActor(userService), "CardGameActor")
+      val oneCardGame = context.spawn(OneCardGameActor(userService), "OneCardGame")
+      context.watch(oneCardGame)
+      val cardGameActor = context.spawn(CardGameActor(userService, oneCardGame), "CardGameActor")
       context.watch(cardGameActor)
 
       val routes = new CardGameRoutes(cardGameActor)(context.system)

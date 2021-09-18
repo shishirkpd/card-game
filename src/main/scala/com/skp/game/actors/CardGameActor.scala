@@ -1,21 +1,17 @@
-package com.skp.game
+package com.skp.game.actors
 
-import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
-import com.skp.game.model.{ActionPerformed, LOBBY, PLAYING, User, UserResponse, WAITING}
+import akka.actor.typed.{ActorRef, Behavior}
+import com.skp.game.model._
 import com.skp.game.service.UserService
 
 object CardGameActor {
-  sealed trait Command
-  final case class CreateUser(user: User,  replyTo: ActorRef[ActionPerformed]) extends Command
-  final case class GetUser(name: String, replyTo: ActorRef[UserResponse]) extends Command
-  final case class Play(name: String, replyTo: ActorRef[ActionPerformed]) extends Command
 
-  def supervisor(userService: UserService): Behavior[Command]= {
+  def supervisor(userService: UserService, oneCardGame: ActorRef[Command]): Behavior[Command] = {
     Behaviors.receiveMessage {
       case CreateUser(user, replyTo) =>
         userService.create(user) match {
-          case user: User =>  replyTo ! ActionPerformed(s"User create with details: " + user.toString)
+          case user: User => replyTo ! ActionPerformed(s"User create with details: " + user.toString)
             Behaviors.same
           case _ => replyTo ! ActionPerformed(s"User can not be created")
             Behaviors.same
@@ -27,6 +23,7 @@ object CardGameActor {
         userService.findBy(name) match {
           case Some(user) if user.status == LOBBY =>
             val updatedUser = User(user.name, user.tokens, WAITING)
+            oneCardGame ! StartGame(updatedUser)
             userService.updateStatus(updatedUser)
             replyTo ! ActionPerformed(s"Waiting for opponent to join")
             Behaviors.same
@@ -43,7 +40,7 @@ object CardGameActor {
     }
   }
 
-  def apply(userService: UserService): Behavior[Command] = supervisor(userService)
+  def apply(userService: UserService, actorRef: ActorRef[Command]): Behavior[Command] = supervisor(userService, actorRef)
 
 
 }
