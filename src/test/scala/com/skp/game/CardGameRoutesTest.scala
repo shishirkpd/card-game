@@ -6,12 +6,13 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.{ContentTypes, HttpRequest, MessageEntity, StatusCodes}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.skp.game.model.User
+import com.skp.game.model.{LOBBY, PLAYING, User, WAITING}
 import com.skp.game.service.UserServiceImpl
-import com.softwaremill.macwire.wire
+import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.mockito.MockitoSugar.mock
 
 class CardGameRoutesTest extends AnyWordSpec with Matchers with ScalaFutures with ScalatestRouteTest {
 
@@ -20,7 +21,7 @@ class CardGameRoutesTest extends AnyWordSpec with Matchers with ScalaFutures wit
   override def createActorSystem(): akka.actor.ActorSystem =
     testKit.system.classicSystem
 
-  val userService: UserServiceImpl = wire[UserServiceImpl]
+  val userService: UserServiceImpl = mock[UserServiceImpl]
   val cardGame: ActorRef[CardGameActor.Command] = testKit.spawn(CardGameActor(userService))
   lazy val routes: Route = CardGameRoutes(cardGame).appRoutes
 
@@ -52,6 +53,57 @@ class CardGameRoutesTest extends AnyWordSpec with Matchers with ScalaFutures wit
         contentType should ===(ContentTypes.`application/json`)
 
         entityAs[String] should ===("""{"description":"User create with details: {\"name\":\"Player1\",\"status\":\"LOBBY\",\"tokens\":1000} with token 1000 user is in LOBBY"}""")
+      }
+    }
+
+    "return the response to user when user not exist (GET /card-game/play/Player1)" in {
+      val request = HttpRequest(uri = "/card-game/play/Player1")
+
+      request ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+
+        contentType should ===(ContentTypes.`application/json`)
+
+        entityAs[String] should ===("""{"description":"Action could not be performed"}""")
+      }
+    }
+
+    "return the response to user when user exist WAITING (GET /card-game/play/Player1)" in {
+      val request = HttpRequest(uri = "/card-game/play/Player1")
+
+      when(userService.findBy("Player1")).thenReturn(Option(User("Player1", status = WAITING)))
+      request ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+
+        contentType should ===(ContentTypes.`application/json`)
+
+        entityAs[String] should ===("""{"description":"Waiting for opponent to join"}""")
+      }
+    }
+
+    "return the response to user when user exist and is in LOBBY (GET /card-game/play/Player1)" in {
+      val request = HttpRequest(uri = "/card-game/play/Player1")
+
+      when(userService.findBy("Player1")).thenReturn(Option(User("Player1", status = LOBBY)))
+      request ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+
+        contentType should ===(ContentTypes.`application/json`)
+
+        entityAs[String] should ===("""{"description":"Waiting for opponent to join"}""")
+      }
+    }
+
+    "return the response to user when user exist and is in PLAYING (GET /card-game/play/Player1)" in {
+      val request = HttpRequest(uri = "/card-game/play/Player1")
+
+      when(userService.findBy("Player1")).thenReturn(Option(User("Player1", status = PLAYING)))
+      request ~> routes ~> check {
+        status should ===(StatusCodes.OK)
+
+        contentType should ===(ContentTypes.`application/json`)
+
+        entityAs[String] should ===("""{"description":"Game in progress"}""")
       }
     }
   }

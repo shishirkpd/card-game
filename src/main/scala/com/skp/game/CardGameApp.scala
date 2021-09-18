@@ -12,7 +12,6 @@ import scala.util.{Failure, Success}
 object CardGameApp {
 
   private def startHttpServer(routes: Route)(implicit system: ActorSystem[_]): Unit = {
-    // Akka HTTP still needs a classic ActorSystem to start
     import system.executionContext
 
     val futureBinding = Http().newServerAt("localhost", 8080).bind(routes)
@@ -27,7 +26,6 @@ object CardGameApp {
   }
 
   def main(args: Array[String]): Unit = {
-    //#server-bootstrapping
     val userService = wire[UserServiceImpl]
     val rootBehavior = Behaviors.setup[Nothing] { context =>
       val cardGameActor = context.spawn(CardGameActor(userService), "CardGameActor")
@@ -39,6 +37,5 @@ object CardGameApp {
       Behaviors.empty
     }
     val system = ActorSystem[Nothing](rootBehavior, "CardGameAkkaHttpServer")
-    //#server-bootstrapping
   }
 }

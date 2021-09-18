@@ -5,6 +5,7 @@ import com.skp.game.model.User
 trait UserService {
   def findBy(name: String): Option[User]
   def create(user: User): User
+  def updateStatus(user: User)
 }
 
 class UserServiceImpl extends UserService {
@@ -23,5 +24,9 @@ class UserServiceImpl extends UserService {
       case None => users+= ((user.name, user))
       user
     }
+  }
+
+  override def updateStatus(user: User): Unit = {
+    users+= ((user.name, user))
   }
 }

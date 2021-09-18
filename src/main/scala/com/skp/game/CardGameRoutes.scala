@@ -5,6 +5,7 @@ import akka.actor.typed._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.directives.OnSuccessMagnet
 import akka.util.Timeout
 import com.skp.game.CardGameActor._
 import com.skp.game.model.{ActionPerformed, User, UserResponse}
@@ -26,6 +27,8 @@ case class CardGameRoutes(gameActor: ActorRef[CardGameActor.Command])(implicit v
     gameActor.ask(GetUser(name, _))
   }
 
+  def play(name: String): Future[ActionPerformed]  = gameActor.ask(Play(name, _))
+
   val appRoutes: Route = pathPrefix("card-game") {
     concat(
       pathEnd {
@@ -43,16 +46,27 @@ case class CardGameRoutes(gameActor: ActorRef[CardGameActor.Command])(implicit v
           }
         )
       },
+      pathPrefix("play") {
+        concat(
+          path(Segment) { name =>
+            get {
+              rejectEmptyResponse {
+                onSuccess(play(name)) { response =>
+                  complete(response)
+                }
+              }
+            }
+          }
+        )
+      },
       path(Segment) { name =>
         concat(
           get {
-            //#retrieve-user-info
             rejectEmptyResponse {
               onSuccess(getUser(name)) { response =>
                 complete(response.user)
               }
             }
-            //#retrieve-user-info
           })
       }
     )
