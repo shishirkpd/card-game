@@ -1,0 +1,61 @@
+package com.skp.game
+
+import akka.actor.typed.scaladsl.AskPattern._
+import akka.actor.typed._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+import akka.util.Timeout
+import com.skp.game.CardGameActor._
+import com.skp.game.model.{ActionPerformed, User, UserResponse}
+
+import scala.concurrent.Future
+
+case class AppRoutes(gameActor: ActorRef[CardGameActor.Command])(implicit val system: ActorSystem[_]) {
+
+  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+  import com.skp.game.utils.JsonFormats._
+
+  private implicit val timeout = Timeout.create(system.settings.config.getDuration("my-app.routes.ask-timeout"))
+
+  def createUser(user: User) : Future[ActionPerformed] = {
+    gameActor.ask(CreateUser(user, _))
+  }
+
+  def getUser(name: String): Future[UserResponse] = {
+    gameActor.ask(GetUser(name, _))
+  }
+
+  val appRoutes: Route = pathPrefix("card-game") {
+    concat(
+      pathEnd {
+        concat(
+          get {
+            complete((StatusCodes.OK, "Choose the game you want to play 1 card or 2 card."))
+          },
+          post {
+            entity(as[String]) { name =>
+              val user = User(name)
+              onSuccess(createUser(user)) { performed =>
+                complete((StatusCodes.Created, performed))
+              }
+            }
+          }
+        )
+      },
+      path(Segment) { name =>
+        concat(
+          get {
+            //#retrieve-user-info
+            rejectEmptyResponse {
+              onSuccess(getUser(name)) { response =>
+                complete(response.user)
+              }
+            }
+            //#retrieve-user-info
+          })
+      }
+    )
+  }
+
+}
