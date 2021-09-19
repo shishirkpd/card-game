@@ -6,7 +6,7 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.{ContentTypes, HttpRequest, MessageEntity, StatusCodes}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.skp.game.actors.{CardGameActor, Command}
+import com.skp.game.actors.{GameActor, Command}
 import com.skp.game.model.{LOBBY, PLAYING, User, WAITING}
 import com.skp.game.service.UserServiceImpl
 import org.mockito.Mockito.when
@@ -23,8 +23,8 @@ class CardGameRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures wit
     testKit.system.classicSystem
 
   val userService: UserServiceImpl = mock[UserServiceImpl]
-  val oneCardGame: ActorRef[Command] = testKit.spawn(actors.OneCardGameActor(userService))
-  val cardGame: ActorRef[Command] = testKit.spawn(actors.CardGameActor(userService, oneCardGame))
+  val oneCardGame: ActorRef[Command] = testKit.spawn(actors.CardGameActor(userService))
+  val cardGame: ActorRef[Command] = testKit.spawn(actors.GameActor(userService, oneCardGame))
   lazy val routes: Route = CardGameRoutes(cardGame).appRoutes
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._

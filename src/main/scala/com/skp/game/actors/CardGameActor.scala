@@ -2,58 +2,51 @@ package com.skp.game.actors
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
-import com.skp.game.model._
+import com.skp.game.model.{ActionPerformed, PLAYING, User}
 import com.skp.game.service.UserService
+import org.slf4j.LoggerFactory
 
 object CardGameActor {
+  var listOfUsers = List.empty[User]
+  var listOfGame: Map[String, ActorRef[Command]] = Map[String, ActorRef[Command]]()
+  private val logger = LoggerFactory.getLogger(getClass)
 
-  def supervisor(userService: UserService, oneCardGame: ActorRef[Command]): Behavior[Command] = {
+  def initialise(userService: UserService): Behavior[Command] = Behaviors.setup { context =>
     Behaviors.receiveMessage {
-      case CreateUser(user, replyTo) =>
-        userService.create(user) match {
-          case user: User => replyTo ! ActionPerformed(s"User create with details: " + user.toString)
-            Behaviors.same
-          case _ => replyTo ! ActionPerformed(s"User can not be created")
-            Behaviors.same
-        }
-      case GetUser(name, replyTo) =>
-        replyTo ! UserResponse(userService.findBy(name))
-        Behaviors.same
-      case Play(name, replyTo) =>
-        userService.findBy(name) match {
-          case Some(user) if user.status == LOBBY =>
-            val updatedUser = User(user.name, user.tokens, WAITING)
-            oneCardGame ! StartGame(updatedUser)
-            userService.updateStatus(updatedUser)
-            replyTo ! ActionPerformed(s"Waiting for opponent to join")
-            Behaviors.same
-          case Some(user) if user.status == WAITING =>
-            replyTo ! ActionPerformed(s"Waiting for opponent to join")
-            Behaviors.same
-          case Some(user) if user.status == PLAYING =>
-            replyTo ! ActionPerformed(s"Game in progress")
-            Behaviors.same
-          case _ => replyTo ! ActionPerformed(s"Action could not be performed")
-            Behaviors.same
-        }
-      case FoldGame(name, replyTo) => {
-        userService.findBy(name) match {
-          case Some(user) => oneCardGame ! FoldForUser(user)
-          replyTo ! ActionPerformed(s"Game folded by user: ${user.name}")
+      case StartGame(user) => listOfUsers = listOfUsers :+ user
+        if(listOfUsers.size >= 2) {
+          val usersForGame = listOfUsers.take(2)
+          val updateUser = usersForGame.map(_.copy(status = PLAYING))
+          updateUser.map(u => userService.updateStatus(u.copy(status = PLAYING)))
+
+          listOfUsers = listOfUsers.filterNot(x => updateUser.contains(x))
+
+          val inProgressGameActor: ActorRef[Command] = context.spawn(InProgressGameActor(userService),
+            s"""InProgressGameFor-${updateUser.head.name}-${updateUser(1).name}""")
+          logger.info(s"New game actor started ${inProgressGameActor.ref}")
+
+          listOfGame += ((updateUser.head.name, inProgressGameActor))
+          listOfGame += ((updateUser(1).name, inProgressGameActor))
+
+          inProgressGameActor ! BeginGame(updateUser.head, updateUser(1))
         }
         Behaviors.same
-      }
-      case Show(name, replyTo) =>
-        userService.findBy(name) match {
-          case Some(user) => oneCardGame ! ShowForUser(user, replyTo)
-        }
+      case FoldForUser(user) =>
+        listOfGame.get(user.name) match {
+            case Some(actorRef) =>  actorRef ! FoldInProgressGameForUser(user)
+            logger.info(s"${user.name} folded ..!!")
+          }
+        Behaviors.same
+      case ShowForUser(user, replyTo) =>
+        listOfGame.get(user.name) match {
+            case Some(actorRef) =>  actorRef ! ShowInProgressGameForUser(user, replyTo)
+            logger.info(s"${user.name} call show ..!!")
+          }
         Behaviors.same
 
-      case _ => Behaviors.same
+      case _  => Behaviors.same
     }
   }
 
-  def apply(userService: UserService, actorRef: ActorRef[Command]): Behavior[Command] = supervisor(userService, actorRef)
-
-
+  def apply(userService: UserService): Behavior[Command] = initialise(userService)
 }
