@@ -18,13 +18,16 @@ object InProgressGameActor {
   def checkCards(players: List[Player]): Player = {
     val player1Cards = players.head.card
     val player2Cards = players(1).card
-    val result: Seq[Boolean] = for {
-      c1 <- player1Cards
-      c2 <- player2Cards
-    } yield {
-      isBigger(c1, c2)
+
+    val rs: Seq[List[Boolean]] = player1Cards.map { card =>
+      player2Cards.map(isBigger(card, _))
     }
-    if (result.forall(_ == false)) players.head else players(1)
+
+    rs.collect {
+      case x :: tail if x == true & tail.forall(_ == true) => players.head
+      case _ => players(1)
+    }.head
+
   }
 
   def checkEqualCards(players: List[Player]): Boolean = {
