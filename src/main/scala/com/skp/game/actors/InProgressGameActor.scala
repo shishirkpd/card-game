@@ -11,9 +11,6 @@ import org.slf4j.LoggerFactory
 import scala.util.Random
 
 object InProgressGameActor {
-  var players: List[Player] = List[Player]()
-  var isShow = false
-
   private val logger = LoggerFactory.getLogger(getClass)
 
   def checkCards(players: List[Player]): Player = {
@@ -24,11 +21,10 @@ object InProgressGameActor {
       player2Cards.map(isBigger(card, _))
     }
 
-    rs.collect {
-      case x :: tail if x == true & tail.forall(_ == true) => players.head
-      case _ => players(1)
-    }.head
-
+    rs.map(x => x.forall(_ == true)).forall(_ == false) match {
+      case true => players(1)
+      case false => players.head
+    }
   }
 
   def checkEqualCards(players: List[Player]): Boolean = {
@@ -37,7 +33,9 @@ object InProgressGameActor {
     player1Cards.diff(player2Cards).size == 0
   }
 
-  def initialise(userService: UserService): Behavior[Command] = {
+  def initialise(userService: UserService): Behavior[Command] = setup { context =>
+    var players: List[Player] = List[Player]()
+    var isShow = false
     receiveMessage {
       case BeginGame(player1, player2, gameType) => gameType match {
         case OneCard =>

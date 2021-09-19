@@ -107,6 +107,19 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
 
         InProgressGameActor.checkCards(List(player1, player2)) shouldBe player2
       }
+
+      "return Player2 wins the game with List(NumberCard(K,Spade), NumberCard(2,Diamond))  vs List(NumberCard(5,Spade), NumberCard(K,Diamond))" in {
+        val user1 = User("Player1")
+        val user2 = User("Player2")
+        val player1Cards1 = NumberCard("5", Spade)
+        val player1Cards2 = NumberCard("K", Diamond)
+        val player2Cards2 = NumberCard("K", Spade)
+        val player2Cards1 = NumberCard("2", Diamond)
+        val player1 = Player(user1, 3, List(player1Cards1, player1Cards2))
+        val player2 = Player(user2, 3, List(player2Cards1, player2Cards2))
+
+        InProgressGameActor.checkCards(List(player1, player2)) shouldBe player1
+      }
     }
   }
 }
