@@ -55,9 +55,9 @@ object InProgressGameActor {
           val looser: Player = players.filter(_.user == losingPlayer.user).head
           val winner: Player = players.filterNot(_.user == losingPlayer.user).head
 
-          userService.updateStatus(User(winner.user.name, winner.user.token + looser.token, LOBBY))
-          userService.updateStatus(User(looser.user.name, looser.user.token - looser.token, LOBBY))
-          replyTo ! ActionPerformed(s"${userService.findBy(winner.user.name)} wins the game ..!!")
+          userService.updateStatus(User(winner.user.name, winner.user.tokens + looser.token, LOBBY))
+          userService.updateStatus(User(looser.user.name, looser.user.tokens - looser.token, LOBBY))
+          replyTo ! ActionPerformed(s"${userService.findBy(winner.user.name).head.name} wins the game ..!!")
           Behaviors.stopped
         } else {
           isShow = true
