@@ -1,8 +1,8 @@
 package com.skp.game.actors
 
-import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.Behaviors._
 import akka.actor.typed.{ActorRef, Behavior}
-import com.skp.game.model.{ActionPerformed, PLAYING, User}
+import com.skp.game.model.{PLAYING, User}
 import com.skp.game.service.UserService
 import org.slf4j.LoggerFactory
 
@@ -11,13 +11,13 @@ object CardGameActor {
   var listOfGame: Map[String, ActorRef[Command]] = Map[String, ActorRef[Command]]()
   private val logger = LoggerFactory.getLogger(getClass)
 
-  def initialise(userService: UserService): Behavior[Command] = Behaviors.setup { context =>
-    Behaviors.receiveMessage {
+  def initialise(userService: UserService): Behavior[Command] = setup { context =>
+    receiveMessage {
       case StartGame(user) => listOfUsers = listOfUsers :+ user
         if(listOfUsers.size >= 2) {
           val usersForGame = listOfUsers.take(2)
           val updateUser = usersForGame.map(_.copy(status = PLAYING))
-          updateUser.map(u => userService.updateStatus(u.copy(status = PLAYING)))
+          updateUser.foreach(u => userService.updateStatus(u.copy(status = PLAYING)))
 
           listOfUsers = listOfUsers.filterNot(x => updateUser.contains(x))
 
@@ -30,21 +30,21 @@ object CardGameActor {
 
           inProgressGameActor ! BeginGame(updateUser.head, updateUser(1))
         }
-        Behaviors.same
+        same
       case FoldForUser(user) =>
         listOfGame.get(user.name) match {
             case Some(actorRef) =>  actorRef ! FoldInProgressGameForUser(user)
             logger.info(s"${user.name} folded ..!!")
           }
-        Behaviors.same
+        same
       case ShowForUser(user, replyTo) =>
         listOfGame.get(user.name) match {
             case Some(actorRef) =>  actorRef ! ShowInProgressGameForUser(user, replyTo)
             logger.info(s"${user.name} call show ..!!")
           }
-        Behaviors.same
+        same
 
-      case _  => Behaviors.same
+      case _  => same
     }
   }
 

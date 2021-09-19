@@ -1,8 +1,8 @@
 package com.skp.game.actors
 
 import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.Behaviors
-import com.skp.game.model.PlayingCard.isBigger
+import akka.actor.typed.scaladsl.Behaviors._
+import com.skp.game.model.PlayingCard.{NumberCard, isBigger}
 import com.skp.game.model.{ActionPerformed, LOBBY, Player, PlayingCard, User}
 import com.skp.game.service.UserService
 import org.slf4j.LoggerFactory
@@ -28,17 +28,17 @@ object InProgressGameActor {
   }
 
   def initialise(userService: UserService): Behavior[Command] = {
-    Behaviors.receiveMessage {
+    receiveMessage {
       case BeginGame(player1, player2) =>
-        val player1Card = PlayingCard.deck(Random.nextInt(52))
-        val player2Card = PlayingCard.deck.filterNot(_ == player1Card)(Random.nextInt(51))
+        val player1Card: NumberCard = PlayingCard.deck(Random.nextInt(52))
+        val player2Card: NumberCard = PlayingCard.deck.filterNot(_ == player1Card)(Random.nextInt(51))
 
         players = players :+ Player(player1, 3, List(player1Card))
         players = players :+ Player(player2, 3, List(player2Card))
 
-        logger.info(s"Starting game for users: ${player1.name} with card: ${player1Card} " +
-          s"and ${player2.name} with card: ${player2Card}")
-        Behaviors.same
+        logger.info(s"Starting game for users: ${player1.name} with card: $player1Card " +
+          s"and ${player2.name} with card: $player2Card")
+        same
 
       case FoldInProgressGameForUser(user) =>
         logger.info(s"Game folded by user: ${user.name}")
@@ -47,7 +47,7 @@ object InProgressGameActor {
 
         userService.updateStatus(User(winner.user.name, winner.user.tokens + looser.token, LOBBY))
         userService.updateStatus(User(looser.user.name, looser.user.tokens - looser.token, LOBBY))
-        Behaviors.stopped
+        stopped
 
       case ShowInProgressGameForUser(_, replyTo) =>
         if(isShow) {
@@ -58,11 +58,11 @@ object InProgressGameActor {
           userService.updateStatus(User(winner.user.name, winner.user.tokens + looser.token, LOBBY))
           userService.updateStatus(User(looser.user.name, looser.user.tokens - looser.token, LOBBY))
           replyTo ! ActionPerformed(s"${userService.findBy(winner.user.name).head.name} wins the game ..!!")
-          Behaviors.stopped
+          stopped
         } else {
           isShow = true
           replyTo ! ActionPerformed(s"waiting for other user show call ..!!")
-          Behaviors.same
+          same
         }
     }
   }
