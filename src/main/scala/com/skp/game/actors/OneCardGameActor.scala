@@ -37,6 +37,12 @@ object OneCardGameActor {
             logger.info(s"${user.name} folded ..!!")
           }
         Behaviors.same
+      case ShowForUser(user, replyTo) =>
+        listOfGame.get(user.name) match {
+            case Some(actorRef) =>  actorRef ! ShowInProgressGameForUser(user, replyTo)
+            logger.info(s"${user.name} call show ..!!")
+          }
+        Behaviors.same
 
       case _  => Behaviors.same
     }

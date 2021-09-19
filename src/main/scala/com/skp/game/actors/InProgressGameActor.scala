@@ -49,18 +49,19 @@ object InProgressGameActor {
         userService.updateStatus(User(looser.user.name, looser.user.tokens - looser.token, LOBBY))
         Behaviors.stopped
 
-      case Show(_, replyTo) =>
+      case ShowInProgressGameForUser(_, replyTo) =>
         if(isShow) {
           val losingPlayer = checkCards(players)
           val looser: Player = players.filter(_.user == losingPlayer.user).head
           val winner: Player = players.filterNot(_.user == losingPlayer.user).head
 
-          userService.updateStatus(User(winner.user.name, winner.token + looser.token, LOBBY))
-          userService.updateStatus(User(looser.user.name, looser.token - looser.token, LOBBY))
+          userService.updateStatus(User(winner.user.name, winner.user.token + looser.token, LOBBY))
+          userService.updateStatus(User(looser.user.name, looser.user.token - looser.token, LOBBY))
           replyTo ! ActionPerformed(s"${userService.findBy(winner.user.name)} wins the game ..!!")
           Behaviors.stopped
         } else {
           isShow = true
+          replyTo ! ActionPerformed(s"waiting for other user show call ..!!")
           Behaviors.same
         }
     }

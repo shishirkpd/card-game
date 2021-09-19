@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
-import com.skp.game.actors.{Command, CreateUser, FoldGame, GetUser, Play}
+import com.skp.game.actors.{Command, CreateUser, FoldGame, GetUser, Play, Show}
 import com.skp.game.model.{ActionPerformed, User, UserResponse}
 
 import scala.concurrent.Future
@@ -29,6 +29,8 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
   def play(name: String): Future[ActionPerformed]  = gameActor.ask(Play(name, _))
 
   def fold(name: String): Future[ActionPerformed]  = gameActor.ask(FoldGame(name, _))
+
+  def show(name: String): Future[ActionPerformed]  = gameActor.ask(Show(name, _))
 
   val appRoutes: Route = pathPrefix("card-game") {
     concat(
@@ -63,6 +65,17 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
               post {
                 entity(as[String]) { name =>
                   onSuccess(fold(name)) { response =>
+                    complete(response)
+                  }
+                }
+              }
+            )
+          },
+          pathPrefix("show") {
+            concat(
+              post {
+                entity(as[String]) { name =>
+                  onSuccess(show(name)) { response =>
                     complete(response)
                   }
                 }

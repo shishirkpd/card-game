@@ -36,13 +36,19 @@ object CardGameActor {
           case _ => replyTo ! ActionPerformed(s"Action could not be performed")
             Behaviors.same
         }
-      case FoldGame(name: String, replyTo) => {
+      case FoldGame(name, replyTo) => {
         userService.findBy(name) match {
           case Some(user) => oneCardGame ! FoldForUser(user)
           replyTo ! ActionPerformed(s"Game folded by user: ${user.name}")
         }
         Behaviors.same
       }
+      case Show(name, replyTo) =>
+        userService.findBy(name) match {
+          case Some(user) => oneCardGame ! ShowForUser(user, replyTo)
+        }
+        Behaviors.same
+
       case _ => Behaviors.same
     }
   }
