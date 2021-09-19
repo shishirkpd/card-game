@@ -16,6 +16,10 @@ final case class StartGame(user: User) extends Command
 
 final case class BeginGame(user1: User, user2: User) extends Command
 
-final case class FoldGame(user: User) extends Command
+final case class FoldGame(user: String, replyTo: ActorRef[ActionPerformed]) extends Command
+
+final case class FoldForUser(user: User) extends Command
+
+final case class FoldInProgressGameForUser(user: User) extends Command
 
 final case class Show(user: User, replyTo: ActorRef[ActionPerformed]) extends Command

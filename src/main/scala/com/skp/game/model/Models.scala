@@ -1,10 +1,14 @@
 package com.skp.game.model
 
+import com.skp.game.model.PlayingCard.NumberCard
+
 case class User(name: String, tokens: Int = 1000, status: StatusEnum = LOBBY) {
   override def toString: String = {
     s"$name with token $tokens user is in $status"
   }
 }
+
+case class Player(user: User, token: Int, card: List[NumberCard])
 
 final case class ActionPerformed(description: String)
 

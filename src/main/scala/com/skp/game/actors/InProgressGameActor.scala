@@ -2,16 +2,18 @@ package com.skp.game.actors
 
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-import com.skp.game.model.PlayingCard.{NumberCard, isBigger}
-import com.skp.game.model.{ActionPerformed, LOBBY, PlayingCard, User}
+import com.skp.game.model.PlayingCard.isBigger
+import com.skp.game.model.{ActionPerformed, LOBBY, Player, PlayingCard, User}
 import com.skp.game.service.UserService
+import org.slf4j.LoggerFactory
 
 import scala.util.Random
 
 object InProgressGameActor {
-  case class Player(user: User, token: Int, card: List[NumberCard])
   var players: List[Player] = List[Player]()
   var isShow = false
+
+  private val logger = LoggerFactory.getLogger(getClass)
 
   def checkCards(players: List[Player]): Player = {
     val player1Cards = players.head.card
@@ -34,14 +36,17 @@ object InProgressGameActor {
         players = players :+ Player(player1, 3, List(player1Card))
         players = players :+ Player(player2, 3, List(player2Card))
 
+        logger.info(s"Starting game for users: ${player1.name} with card: ${player1Card} " +
+          s"and ${player2.name} with card: ${player2Card}")
         Behaviors.same
 
-      case FoldGame(user) =>
+      case FoldInProgressGameForUser(user) =>
+        logger.info(s"Game folded by user: ${user.name}")
         val looser: Player = players.filter(_.user == user).head
         val winner: Player = players.filterNot(_.user == user).head
 
-        userService.updateStatus(User(winner.user.name, winner.token + looser.token, LOBBY))
-        userService.updateStatus(User(looser.user.name, looser.token - looser.token, LOBBY))
+        userService.updateStatus(User(winner.user.name, winner.user.tokens + looser.token, LOBBY))
+        userService.updateStatus(User(looser.user.name, looser.user.tokens - looser.token, LOBBY))
         Behaviors.stopped
 
       case Show(_, replyTo) =>
