@@ -2,6 +2,7 @@ package com.skp.game.actors
 
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors._
+import com.skp.game.model.GameType.{OneCard, TwoCard}
 import com.skp.game.model.PlayingCard.{NumberCard, isBigger}
 import com.skp.game.model.{ActionPerformed, LOBBY, Player, PlayingCard, User}
 import com.skp.game.service.UserService
@@ -38,15 +39,29 @@ object InProgressGameActor {
 
   def initialise(userService: UserService): Behavior[Command] = {
     receiveMessage {
-      case BeginGame(player1, player2) =>
-        val player1Card: NumberCard = PlayingCard.deck(Random.nextInt(52))
-        val player2Card: NumberCard = PlayingCard.deck.filterNot(_ == player1Card)(Random.nextInt(51))
+      case BeginGame(player1, player2, gameType) => gameType match {
+        case OneCard =>
+          val player1Card: NumberCard = PlayingCard.deck(Random.nextInt(52))
+          val player2Card: NumberCard = PlayingCard.deck.filterNot(_ == player1Card)(Random.nextInt(51))
 
-        players = players :+ Player(player1, 3, List(player1Card))
-        players = players :+ Player(player2, 3, List(player2Card))
+          players = players :+ Player(player1, 3, List(player1Card))
+          players = players :+ Player(player2, 3, List(player2Card))
 
-        logger.info(s"Starting game for users: ${player1.name} with card: $player1Card " +
-          s"and ${player2.name} with card: $player2Card")
+          logger.info(s"Starting game for users: ${player1.name} with card: $player1Card " +
+            s"and ${player2.name} with card: $player2Card")
+        case TwoCard =>
+          val player1Card1: NumberCard = PlayingCard.deck(Random.nextInt(52))
+          val player1Card2: NumberCard = PlayingCard.deck.filterNot(_ == player1Card1)(Random.nextInt(51))
+          val player2Card1: NumberCard = PlayingCard.deck.filterNot(x => x == player1Card1 || x == player1Card2)(Random.nextInt(50))
+          val player2Card2: NumberCard = PlayingCard.deck.filterNot(x => x == player1Card1 || x == player1Card2 || x == player2Card1)(Random.nextInt(49))
+
+          players = players :+ Player(player1, 3, List(player1Card1, player1Card2))
+          players = players :+ Player(player2, 3, List(player2Card1, player2Card2))
+
+          logger.info(s"Starting game for users: ${player1.name} with card: $player1Card1 and $player1Card2 " +
+            s"and ${player2.name} with card: $player2Card1 and $player2Card2")
+      }
+
         same
 
       case FoldInProgressGameForUser(user) =>
@@ -56,20 +71,22 @@ object InProgressGameActor {
 
         userService.updateStatus(User(winner.user.name, winner.user.tokens + looser.token, LOBBY))
         userService.updateStatus(User(looser.user.name, looser.user.tokens - looser.token, LOBBY))
+        isShow = false
         stopped
 
       case ShowInProgressGameForUser(_, replyTo) =>
         if(isShow) {
           if(checkEqualCards(players)) {
+            players.map(_.user).foreach(u => userService.updateStatus(User(u.name, u.tokens, LOBBY)))
             replyTo ! ActionPerformed(s"${userService.findBy(players.head.user.name).head.name} and ${userService.findBy(players(1).user.name).head.name} wins the game ..!!")
           } else {
-            val losingPlayer = checkCards(players)
-            val looser: Player = players.filter(_.user == losingPlayer.user).head
-            val winner: Player = players.filterNot(_.user == losingPlayer.user).head
+            logger.debug(s"Player list $players")
+            val winner: Player = checkCards(players)
+            val looser: Player = players.filterNot(_.user == winner.user).head
 
             userService.updateStatus(User(winner.user.name, winner.user.tokens + looser.token, LOBBY))
             userService.updateStatus(User(looser.user.name, looser.user.tokens - looser.token, LOBBY))
-            replyTo ! ActionPerformed(s"${userService.findBy(winner.user.name).head.name} wins the game ..!!")
+            replyTo ! ActionPerformed(s"${userService.findBy(winner.user.name).head.name} wins the game with ${winner.card}  vs ${looser.card}..!!")
           }
           stopped
         } else {

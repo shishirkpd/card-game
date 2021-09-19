@@ -2,7 +2,7 @@ package com.skp.game.model
 
 import com.skp.game.model.PlayingCard.NumberCard
 
-case class User(name: String, tokens: Int = 1000, status: StatusEnum = LOBBY) {
+case class User(name: String, tokens: Int = 1000, status: UserStatus = LOBBY) {
   override def toString: String = {
     s"$name with token $tokens user is in $status"
   }

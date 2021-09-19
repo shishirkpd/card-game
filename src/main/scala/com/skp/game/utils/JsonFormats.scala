@@ -7,8 +7,8 @@ object JsonFormats {
 
   import DefaultJsonProtocol._
 
-  implicit object StateJsonFormat extends RootJsonFormat[StatusEnum] {
-    def write(s: StatusEnum) = s match {
+  implicit object StateJsonFormat extends RootJsonFormat[UserStatus] {
+    def write(s: UserStatus) = s match {
       case LOBBY => JsString("LOBBY")
       case WAITING => JsString("WAITING")
       case PLAYING => JsString("PLAYING")

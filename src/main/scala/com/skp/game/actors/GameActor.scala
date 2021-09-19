@@ -19,11 +19,11 @@ object GameActor {
       case GetUser(name, replyTo) =>
         replyTo ! UserResponse(userService.findBy(name))
         same
-      case Play(name, replyTo) =>
+      case Play(name, replyTo, gameType) =>
         userService.findBy(name) match {
           case Some(user) if user.status == LOBBY =>
             val updatedUser = User(user.name, user.tokens, WAITING)
-            oneCardGame ! StartGame(updatedUser)
+            oneCardGame ! StartGame(updatedUser, gameType)
             userService.updateStatus(updatedUser)
             replyTo ! ActionPerformed(s"Waiting for opponent to join")
             same

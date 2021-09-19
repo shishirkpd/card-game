@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
 import com.skp.game.actors.{Command, CreateUser, FoldGame, GetUser, Play, Show}
-import com.skp.game.model.{ActionPerformed, User, UserResponse}
+import com.skp.game.model.{ActionPerformed, GameType, User, UserResponse}
 
 import scala.concurrent.Future
 
@@ -26,7 +26,7 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
     gameActor.ask(GetUser(name, _))
   }
 
-  def play(name: String): Future[ActionPerformed]  = gameActor.ask(Play(name, _))
+  def play(name: String, gameType: GameType.Value): Future[ActionPerformed]  = gameActor.ask(Play(name, _, gameType))
 
   def fold(name: String): Future[ActionPerformed]  = gameActor.ask(FoldGame(name, _))
 
@@ -49,40 +49,81 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
           }
         )
       },
-      pathPrefix("play") {
+      pathPrefix("1") {
         concat(
-          path(Segment) { name =>
-            get {
-              rejectEmptyResponse {
-                onSuccess(play(name)) { response =>
-                  complete(response)
-                }
-              }
-            }
-          },
-          pathPrefix("fold") {
+          pathPrefix("play") {
             concat(
-              post {
-                entity(as[String]) { name =>
-                  onSuccess(fold(name)) { response =>
-                    complete(response)
+              pathPrefix("fold") {
+                concat(
+                  post {
+                    entity(as[String]) { name =>
+                      onSuccess(fold(name)) { response =>
+                        complete(response)
+                      }
+                    }
+                  }
+                )
+              },
+              pathPrefix("show") {
+                concat(
+                  post {
+                    entity(as[String]) { name =>
+                      onSuccess(show(name)) { response =>
+                        complete(response)
+                      }
+                    }
+                  }
+                )
+              },
+              path(Segment) { name =>
+                get {
+                  rejectEmptyResponse {
+                    onSuccess(play(name, GameType.OneCard)) { response =>
+                      complete(response)
+                    }
                   }
                 }
               }
             )
-          },
-          pathPrefix("show") {
+          })
+      },
+      pathPrefix("2") {
+        concat(
+          pathPrefix("play") {
             concat(
-              post {
-                entity(as[String]) { name =>
-                  onSuccess(show(name)) { response =>
-                    complete(response)
+              pathPrefix("fold") {
+                concat(
+                  post {
+                    entity(as[String]) { name =>
+                      onSuccess(fold(name)) { response =>
+                        complete(response)
+                      }
+                    }
+                  }
+                )
+              },
+              pathPrefix("show") {
+                concat(
+                  post {
+                    entity(as[String]) { name =>
+                      onSuccess(show(name)) { response =>
+                        complete(response)
+                      }
+                    }
+                  }
+                )
+              },
+              path(Segment) { name =>
+                get {
+                  rejectEmptyResponse {
+                    onSuccess(play(name, GameType.TwoCard)) { response =>
+                      complete(response)
+                    }
                   }
                 }
               }
             )
-          }
-        )
+          })
       },
       path(Segment) { name =>
         concat(
