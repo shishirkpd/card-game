@@ -34,7 +34,7 @@ The server deals a single card from the deck to each player and sends the card t
 #### Player makes a decision
 
 Each player independently of each other sends the server a decision which is one of:
-* `play`
+* `show`
 * `fold`
 
 #### Showdown and results
@@ -72,7 +72,7 @@ are henceforth referred to as "the hand".
 #### Player makes a decision
 
 Each player independently of each other sends the server a decision which is one of:
-* `play`
+* `show`
 * `fold`
 
 #### Showdown and results
