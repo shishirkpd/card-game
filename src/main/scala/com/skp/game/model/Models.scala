@@ -8,7 +8,7 @@ case class User(name: String, tokens: Int = 1000, status: UserStatus = LOBBY) {
   }
 }
 
-case class Player(user: User, token: Int, card: List[NumberCard])
+case class Player(user: User, card: List[NumberCard])
 
 final case class ActionPerformed(description: String)
 

@@ -53,15 +53,15 @@ object CardGameActor {
           }
         }
         same
-      case FoldForUser(user) =>
+      case FoldForUser(user, replyTo, gameType) =>
         listOfGame.get(user.name) match {
-            case Some(actorRef) =>  actorRef ! FoldInProgressGameForUser(user)
+            case Some(actorRef) =>  actorRef ! FoldInProgressGameForUser(user, replyTo, gameType)
             logger.info(s"${user.name} folded ..!!")
           }
         same
-      case ShowForUser(user, replyTo) =>
+      case ShowForUser(user, replyTo, gameType) =>
         listOfGame.get(user.name) match {
-            case Some(actorRef) =>  actorRef ! ShowInProgressGameForUser(user, replyTo)
+            case Some(actorRef) =>  actorRef ! ShowInProgressGameForUser(user, replyTo, gameType)
             logger.info(s"${user.name} call show ..!!")
           }
         same

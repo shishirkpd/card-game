@@ -36,18 +36,17 @@ object GameActor {
           case _ => replyTo ! ActionPerformed(s"Action could not be performed")
             same
         }
-      case FoldGame(name, replyTo) =>
+      case FoldGame(name, replyTo, gameType) =>
         userService.findBy(name) match {
-          case Some(user) => oneCardGame ! FoldForUser(user)
-          replyTo ! ActionPerformed(s"Game folded by user: ${user.name}")
-        }
-        same
-      case Show(name, replyTo) =>
-        userService.findBy(name) match {
-          case Some(user) => oneCardGame ! ShowForUser(user, replyTo)
-        }
-        same
+          case Some(user) => oneCardGame ! FoldForUser(user, replyTo, gameType)
 
+        }
+        same
+      case Show(name, replyTo, gameType) =>
+        userService.findBy(name) match {
+          case Some(user) => oneCardGame ! ShowForUser(user, replyTo, gameType)
+        }
+        same
       case _ => same
     }
   }

@@ -1,12 +1,12 @@
 package com.skp.game
 
-import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed._
+import akka.actor.typed.scaladsl.AskPattern._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
-import com.skp.game.actors.{Command, CreateUser, FoldGame, GetUser, Play, Show}
+import com.skp.game.actors._
 import com.skp.game.model.{ActionPerformed, GameType, User, UserResponse}
 
 import scala.concurrent.Future
@@ -28,9 +28,9 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
 
   def play(name: String, gameType: GameType.Value): Future[ActionPerformed]  = gameActor.ask(Play(name, _, gameType))
 
-  def fold(name: String): Future[ActionPerformed]  = gameActor.ask(FoldGame(name, _))
+  def fold(name: String, gameType: GameType.Value): Future[ActionPerformed]  = gameActor.ask(FoldGame(name, _, gameType))
 
-  def show(name: String): Future[ActionPerformed]  = gameActor.ask(Show(name, _))
+  def show(name: String, gameType: GameType.Value): Future[ActionPerformed]  = gameActor.ask(Show(name, _, gameType))
 
   val appRoutes: Route = pathPrefix("card-game") {
     concat(
@@ -57,7 +57,7 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
                 concat(
                   post {
                     entity(as[String]) { name =>
-                      onSuccess(fold(name)) { response =>
+                      onSuccess(fold(name, GameType.OneCard)) { response =>
                         complete(response)
                       }
                     }
@@ -68,7 +68,7 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
                 concat(
                   post {
                     entity(as[String]) { name =>
-                      onSuccess(show(name)) { response =>
+                      onSuccess(show(name, GameType.OneCard)) { response =>
                         complete(response)
                       }
                     }
@@ -95,7 +95,7 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
                 concat(
                   post {
                     entity(as[String]) { name =>
-                      onSuccess(fold(name)) { response =>
+                      onSuccess(fold(name, GameType.TwoCard)) { response =>
                         complete(response)
                       }
                     }
@@ -106,7 +106,7 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
                 concat(
                   post {
                     entity(as[String]) { name =>
-                      onSuccess(show(name)) { response =>
+                      onSuccess(show(name, GameType.TwoCard)) { response =>
                         complete(response)
                       }
                     }

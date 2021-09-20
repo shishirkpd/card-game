@@ -16,14 +16,14 @@ final case class StartGame(user: User, gameType: GameType.Value) extends Command
 
 final case class BeginGame(user1: User, user2: User, gameType: GameType.Value) extends Command
 
-final case class FoldGame(user: String, replyTo: ActorRef[ActionPerformed]) extends Command
+final case class FoldGame(user: String, replyTo: ActorRef[ActionPerformed], gameType: GameType.Value) extends Command
 
-final case class FoldForUser(user: User) extends Command
+final case class FoldForUser(user: User, replyTo: ActorRef[ActionPerformed], gameType: GameType.Value) extends Command
 
-final case class FoldInProgressGameForUser(user: User) extends Command
+final case class FoldInProgressGameForUser(user: User, replyTo: ActorRef[ActionPerformed], gameType: GameType.Value) extends Command
 
-final case class Show(name: String, replyTo: ActorRef[ActionPerformed]) extends Command
+final case class Show(name: String, replyTo: ActorRef[ActionPerformed], gameType: GameType.Value) extends Command
 
-final case class ShowForUser(user: User, replyTo: ActorRef[ActionPerformed]) extends Command
+final case class ShowForUser(user: User, replyTo: ActorRef[ActionPerformed], gameType: GameType.Value) extends Command
 
-final case class ShowInProgressGameForUser(user: User, replyTo: ActorRef[ActionPerformed]) extends Command
+final case class ShowInProgressGameForUser(user: User, replyTo: ActorRef[ActionPerformed], gameType: GameType.Value) extends Command

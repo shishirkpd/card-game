@@ -15,8 +15,8 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
         val user2 = User("Player2")
         val player1Cards = NumberCard("J", Diamond)
         val player2Cards = NumberCard("J", Heart)
-        val player1 = Player(user1, 3, List(player1Cards))
-        val player2 = Player(user2, 3, List(player2Cards))
+        val player1 = Player(user1, List(player1Cards))
+        val player2 = Player(user2, List(player2Cards))
 
         InProgressGameActor.checkEqualCards(List(player1, player2)) shouldBe true
       }
@@ -26,8 +26,8 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
         val user2 = User("Player2")
         val player1Cards = NumberCard("J", Diamond)
         val player2Cards = NumberCard("2", Heart)
-        val player1 = Player(user1, 3, List(player1Cards))
-        val player2 = Player(user2, 3, List(player2Cards))
+        val player1 = Player(user1, List(player1Cards))
+        val player2 = Player(user2, List(player2Cards))
 
         InProgressGameActor.checkEqualCards(List(player1, player2)) shouldBe false
       }
@@ -39,8 +39,8 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
         val player1Cards2 = NumberCard("9", Diamond)
         val player2Cards2 = NumberCard("J", Heart)
         val player2Cards1 = NumberCard("9", Spade)
-        val player1 = Player(user1, 3, List(player1Cards1, player1Cards2))
-        val player2 = Player(user2, 3, List(player2Cards1, player2Cards2))
+        val player1 = Player(user1, List(player1Cards1, player1Cards2))
+        val player2 = Player(user2, List(player2Cards1, player2Cards2))
 
         InProgressGameActor.checkEqualCards(List(player1, player2)) shouldBe true
       }
@@ -52,8 +52,8 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
         val player1Cards2 = NumberCard("9", Diamond)
         val player2Cards2 = NumberCard("J", Heart)
         val player2Cards1 = NumberCard("5", Spade)
-        val player1 = Player(user1, 3, List(player1Cards1, player1Cards2))
-        val player2 = Player(user2, 3, List(player2Cards1, player2Cards2))
+        val player1 = Player(user1, List(player1Cards1, player1Cards2))
+        val player2 = Player(user2, List(player2Cards1, player2Cards2))
 
         InProgressGameActor.checkEqualCards(List(player1, player2)) shouldBe false
       }
@@ -65,8 +65,8 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
         val user2 = User("Player2")
         val player1Cards = NumberCard("J", Diamond)
         val player2Cards = NumberCard("4", Heart)
-        val player1 = Player(user1, 3, List(player1Cards))
-        val player2 = Player(user2, 3, List(player2Cards))
+        val player1 = Player(user1, List(player1Cards))
+        val player2 = Player(user2, List(player2Cards))
 
         InProgressGameActor.checkCards(List(player1, player2)) shouldBe player1
       }
@@ -76,8 +76,8 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
         val user2 = User("Player2")
         val player1Cards = NumberCard("J", Diamond)
         val player2Cards = NumberCard("A", Club)
-        val player1 = Player(user1, 3, List(player1Cards))
-        val player2 = Player(user2, 3, List(player2Cards))
+        val player1 = Player(user1, List(player1Cards))
+        val player2 = Player(user2, List(player2Cards))
 
         InProgressGameActor.checkCards(List(player1, player2)) shouldBe player2
       }
@@ -89,8 +89,8 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
         val player1Cards2 = NumberCard("9", Diamond)
         val player2Cards2 = NumberCard("J", Heart)
         val player2Cards1 = NumberCard("7", Spade)
-        val player1 = Player(user1, 3, List(player1Cards1, player1Cards2))
-        val player2 = Player(user2, 3, List(player2Cards1, player2Cards2))
+        val player1 = Player(user1, List(player1Cards1, player1Cards2))
+        val player2 = Player(user2, List(player2Cards1, player2Cards2))
 
         InProgressGameActor.checkCards(List(player1, player2)) shouldBe player1
       }
@@ -102,8 +102,8 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
         val player1Cards2 = NumberCard("9", Diamond)
         val player2Cards2 = NumberCard("J", Heart)
         val player2Cards1 = NumberCard("Q", Spade)
-        val player1 = Player(user1, 3, List(player1Cards1, player1Cards2))
-        val player2 = Player(user2, 3, List(player2Cards1, player2Cards2))
+        val player1 = Player(user1, List(player1Cards1, player1Cards2))
+        val player2 = Player(user2, List(player2Cards1, player2Cards2))
 
         InProgressGameActor.checkCards(List(player1, player2)) shouldBe player2
       }
@@ -115,8 +115,8 @@ class InProgressGameActorSpec extends AnyWordSpec with Matchers {
         val player1Cards2 = NumberCard("K", Diamond)
         val player2Cards2 = NumberCard("K", Spade)
         val player2Cards1 = NumberCard("2", Diamond)
-        val player1 = Player(user1, 3, List(player1Cards1, player1Cards2))
-        val player2 = Player(user2, 3, List(player2Cards1, player2Cards2))
+        val player1 = Player(user1, List(player1Cards1, player1Cards2))
+        val player2 = Player(user2, List(player2Cards1, player2Cards2))
 
         InProgressGameActor.checkCards(List(player1, player2)) shouldBe player1
       }
