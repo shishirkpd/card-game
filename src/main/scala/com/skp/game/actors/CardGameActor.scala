@@ -3,7 +3,7 @@ package com.skp.game.actors
 import akka.actor.typed.scaladsl.Behaviors._
 import akka.actor.typed.{ActorRef, Behavior}
 import com.skp.game.model.GameType.{OneCard, TwoCard}
-import com.skp.game.model.{GameType, PLAYING, User}
+import com.skp.game.model.{ActionPerformed, GameType, PLAYING, User}
 import com.skp.game.service.UserService
 import org.slf4j.LoggerFactory
 
@@ -22,7 +22,7 @@ object CardGameActor {
               val updateUser = usersForGame.map(_.copy(status = PLAYING))
               updateUser.foreach(u => userService.updateStatus(u.copy(status = PLAYING)))
 
-              listOfUsers = listOfUsers.filterNot(x => updateUser.contains(x))
+              listOfUsers = listOfUsers.filterNot(x => updateUser.map(_.name).contains(x._1.name))
 
               val inProgressGameActor: ActorRef[Command] = context.spawn(InProgressGameActor(userService),
                 s"""InProgressGameFor-${updateUser.head.name}-${updateUser(1).name}""")
@@ -39,7 +39,7 @@ object CardGameActor {
               val updateUser = usersForGame.map(_.copy(status = PLAYING))
               updateUser.foreach(u => userService.updateStatus(u.copy(status = PLAYING)))
 
-              listOfUsers = listOfUsers.filterNot(x => updateUser.contains(x))
+              listOfUsers = listOfUsers.filterNot(x => updateUser.map(_.name).contains(x._1.name))
 
               val inProgressGameActor: ActorRef[Command] = context.spawn(InProgressGameActor(userService),
                 s"""InProgressGameFor-${updateUser.head.name}-${updateUser(1).name}""")
@@ -57,12 +57,14 @@ object CardGameActor {
         listOfGame.get(user.name) match {
             case Some(actorRef) =>  actorRef ! FoldInProgressGameForUser(user, replyTo, gameType)
             logger.info(s"${user.name} folded ..!!")
+            case None => replyTo ! ActionPerformed(s"Sorry no game is progress..!!")
           }
         same
       case ShowForUser(user, replyTo, gameType) =>
         listOfGame.get(user.name) match {
             case Some(actorRef) =>  actorRef ! ShowInProgressGameForUser(user, replyTo, gameType)
             logger.info(s"${user.name} call show ..!!")
+            case None => replyTo ! ActionPerformed(s"Sorry no game is progress..!!")
           }
         same
 

@@ -1,6 +1,8 @@
 package com.skp.game.service
 
+import com.skp.game.actors.CardGameActor.getClass
 import com.skp.game.model.User
+import org.slf4j.LoggerFactory
 
 trait UserService {
   def findBy(name: String): Option[User]
@@ -11,6 +13,8 @@ trait UserService {
 class UserServiceImpl extends UserService {
 
   private var users = Map[String, User]()
+  private val logger = LoggerFactory.getLogger(getClass)
+
   override def findBy(name: String): Option[User] = {
     users.get(name) match {
       case None => None
@@ -27,6 +31,7 @@ class UserServiceImpl extends UserService {
   }
 
   override def updateStatus(user: User): Unit = {
+    logger.info(s"Updating user: $user")
     users+= ((user.name, user))
   }
 }

@@ -29,9 +29,7 @@ object CardGameApp {
   def main(args: Array[String]): Unit = {
     val userService = wire[UserServiceImpl]
     val rootBehavior = Behaviors.setup[Nothing] { context =>
-      val oneCardGame = context.spawn(CardGameActor(userService), "OneCardGame")
-      context.watch(oneCardGame)
-      val cardGameActor = context.spawn(GameActor(userService, oneCardGame), "CardGameActor")
+      val cardGameActor = context.spawn(GameActor(userService), "GameActor")
       context.watch(cardGameActor)
 
       val routes = new CardGameRoutes(cardGameActor)(context.system)
