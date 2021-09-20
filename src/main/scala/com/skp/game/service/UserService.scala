@@ -1,6 +1,5 @@
 package com.skp.game.service
 
-import com.skp.game.actors.CardGameActor.getClass
 import com.skp.game.model.User
 import org.slf4j.LoggerFactory
 

@@ -4,7 +4,7 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
-import com.skp.game.actors.{GameActor, CardGameActor}
+import com.skp.game.actors.GameActor
 import com.skp.game.service.UserServiceImpl
 import com.softwaremill.macwire.wire
 

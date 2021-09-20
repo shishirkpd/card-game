@@ -1,7 +1,7 @@
 package com.skp.game.actors
 
+import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors._
-import akka.actor.typed.{ActorRef, Behavior}
 import com.skp.game.model._
 import com.skp.game.service.UserService
 
