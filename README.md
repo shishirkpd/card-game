@@ -34,15 +34,15 @@ The server deals a single card from the deck to each player and sends the card t
 #### Player makes a decision
 
 Each player independently of each other sends the server a decision which is one of:
-* `play`
+* `show`
 * `fold`
 
 #### Showdown and results
 
 * In case both players picked `fold` each player loses 1 token.
-* In case one player picked `play` and the other player picked `fold` then the player who picked `play` wins
+* In case one player picked `show` and the other player picked `fold` then the player who picked `show` wins
   3 tokens, and the player who picked `fold` loses 3 tokens.
-* In case both players picked `play` then the cards are compared (see below) - the winning player wins 10
+* In case both players picked `show` then the cards are compared (see below) - the winning player wins 10
   tokens, and the losing player loses 10 tokens.
 
 The cards are compared as follows:
@@ -53,13 +53,13 @@ The cards are compared as follows:
 ##### Example 1
 
 * `Player A` has `Jack of Clubs` and selects `fold`.
-* `Player B` has `Ten of Hearts` and selects `play`.
+* `Player B` has `Ten of Hearts` and selects `show`.
 * `Player A` loses 3 tokens, and `Player B` wins 3 tokens.
 
 ##### Example 2
 
-* `Player A` has `Queen of Diamonds` and selects `play`.
-* `Player B` has `Nine of Spades` and selects `play`.
+* `Player A` has `Queen of Diamonds` and selects `show`.
+* `Player B` has `Nine of Spades` and selects `show`.
 * `Player A` wins 10 tokens, and `Player B` loses 10 tokens.
 
 ### 'Double-card game'
@@ -72,15 +72,15 @@ are henceforth referred to as "the hand".
 #### Player makes a decision
 
 Each player independently of each other sends the server a decision which is one of:
-* `play`
+* `show`
 * `fold`
 
 #### Showdown and results
 
 * In case both players picked `fold` each player loses 2 tokens.
-* In case one player picked `play` and the other player picked `fold` then the player who picked `play` wins
+* In case one player picked `show` and the other player picked `fold` then the player who picked `show` wins
   5 tokens, and the player who picked `fold` loses 5 tokens.
-* In case both players picked `play` then the cards are compared (see below) - the winning player wins 20
+* In case both players picked `show` then the cards are compared (see below) - the winning player wins 20
   tokens, and the losing player loses 20 tokens.
 
 First, the cards with the highest rank from each hand are compared. If they differ, the player whose card has
@@ -92,8 +92,8 @@ If those are also equal, then the game returns to "Server deals cards" stage (ne
 
 ##### Example 3
 
-* `Player A` has `Jack of Clubs` and `Nine of Hearts` and selects `play`.
-* `Player B` has `Jack of Diamonds` and `Ten of Diamonds` and selects `play`.
+* `Player A` has `Jack of Clubs` and `Nine of Hearts` and selects `show`.
+* `Player B` has `Jack of Diamonds` and `Ten of Diamonds` and selects `show`.
 * `Player A` loses 20 tokens, and `Player B` wins 20 tokens.
 
 ### Finishing the game
