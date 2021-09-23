@@ -3,14 +3,17 @@ package com.skp.game
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{Directives, Route, RouteConcatenation}
 import com.skp.game.actors.GameActor
 import com.skp.game.service.UserServiceImpl
 import com.softwaremill.macwire.wire
+import akka.http.scaladsl.Http
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
+import com.skp.game.swagger.{Site, SwaggerDocService}
 
 import scala.util.{Failure, Success}
 
-object CardGameApp {
+object CardGameApp extends RouteConcatenation with Site{
 
   private def startHttpServer(routes: Route)(implicit system: ActorSystem[_]): Unit = {
     import system.executionContext
@@ -32,8 +35,11 @@ object CardGameApp {
       val cardGameActor = context.spawn(GameActor(userService), "GameActor")
       context.watch(cardGameActor)
 
-      val routes = new CardGameRoutes(cardGameActor)(context.system)
-      startHttpServer(routes.appRoutes)(context.system)
+      val routes = (
+        new CardGameRoutes(cardGameActor)(context.system).routes ~
+        SwaggerDocService.routes ~
+        site)
+      startHttpServer(routes)(context.system)
 
       Behaviors.empty
     }

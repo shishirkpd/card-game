@@ -24,7 +24,7 @@ class CardGameRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures wit
 
   val userService: UserServiceImpl = mock[UserServiceImpl]
   val cardGame: ActorRef[Command] = testKit.spawn(actors.GameActor(userService))
-  lazy val routes: Route = CardGameRoutes(cardGame).appRoutes
+  lazy val routes: Route = CardGameRoutes(cardGame).createUsers
 
   import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
   import com.skp.game.utils.JsonFormats._
