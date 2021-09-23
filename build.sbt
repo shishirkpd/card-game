@@ -5,7 +5,7 @@ val jacksonVersion = "2.12.5"
 lazy val root = (project in file(".")).
   settings(
     inThisBuild(List(
-      organization    := "com.example",
+      organization    := "com.skp",
       scalaVersion    := "2.13.4"
     )),
     name := "card-games",
