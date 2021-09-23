@@ -35,7 +35,7 @@ object GameActor {
             case Some(user) if user.status == PLAYING =>
               replyTo ! ActionPerformed(s"Game in progress")
               same
-            case None => replyTo ! ActionPerformed(s"Action could not be performed as $name not register")
+            case _ => replyTo ! ActionPerformed(s"Action could not be performed as $name not register")
               same
           }
         case FoldGame(name, replyTo, gameType) =>

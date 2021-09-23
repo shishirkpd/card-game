@@ -74,7 +74,7 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
       content = Array(new Content(schema = new Schema(implementation = classOf[String])))),
     responses = Array(
       new ApiResponse(responseCode = "201", description = "Create players for card game",
-        content = Array(new Content(schema = new Schema(implementation = classOf[ApiResponse])))),
+        content = Array(new Content(schema = new Schema(implementation = classOf[ActionPerformed])))),
       new ApiResponse(responseCode = "500", description = "Internal server error"))
   )
   def createUsers: Route = path("player") {
@@ -100,13 +100,17 @@ case class CardGameRoutes(gameActor: ActorRef[Command])(implicit val system: Act
     responses = Array(
       new ApiResponse(responseCode = "201", description = "Details of the players for card game",
         content = Array(new Content(schema = new Schema(implementation = classOf[ActionPerformed])))),
-      new ApiResponse(responseCode = "500", description = "Internal server error"))
+      new ApiResponse(responseCode = "500", description = "Internal server error"),
+      new ApiResponse(responseCode = "404", description = "Player details not found"))
   )
   def getUsersDetails: Route = path("player" / Segment) { name =>
     get {
       rejectEmptyResponse {
         onSuccess(getUser(name)) { response =>
-          complete(response.user)
+          complete(response.user match {
+            case Some(user) => ActionPerformed(user.toString)
+            case None => ActionPerformed(s"Details for $name not found")
+          })
         }
       }
     }
