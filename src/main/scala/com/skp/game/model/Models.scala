@@ -4,7 +4,7 @@ import com.skp.game.model.PlayingCard.NumberCard
 
 case class User(name: String, tokens: Int = 1000, status: UserStatus = LOBBY) {
   override def toString: String = {
-    s"$name with token $tokens user is in $status"
+    s"$name with token $tokens is in $status"
   }
 }
 
