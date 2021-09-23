@@ -102,3 +102,88 @@ Upon finishing of the game, the server applies the game results to player balanc
 about the game result as well as their respective updated balances.
 
 After this, both players are returned to "Player chooses game type" stage.
+
+
+# To Start the application
+> **sbt run**
+
+> It will start the application on **http://localhost:8080**
+
+> As the swagger ui is embedded we can access it via **http://localhost:8080/swagger**
+## To run test cases 
+> sbt test
+
+## API's details
+### Game Details
+#### To fetch the information about the Card game  
+> GET **http://locahost:8080/card-game** 
+> 
+> **curl -X GET "http://localhost:8080/card-game" -H "accept: text/plain"**
+
+#### To add the player to the card game 
+> POST **http://localhost:8080/card-game/player**
+> 
+> with body as name of player
+
+> Request
+> **curl -X POST "http://localhost:8080/card-game/player" -H "accept: application/json" -H "Content-Type: application/json" -d "P1"**
+
+Response
+ ``` json lines 
+{ "description": "User create with details: P1 with token 1000 user is in LOBBY" }
+```
+
+#### To fetch the details of player
+
+> Get **http://localhost:8080/card-game/player/P1**
+>
+> with parameter as name of player
+
+> Request
+> **curl -X GET "http://localhost:8080/card-game/player/P1" -H "accept: application/json"**
+
+Response
+ ``` json lines 
+{ "description": "P1 with token 1000 user is in LOBBY" }
+```
+
+#### To start playing one card game
+> Post **http://localhost:8080/card-game/1/player/P1**
+>
+> with parameter as game type 1 for one card and 2 for 2 card and name of player
+
+> Request
+> **curl -X POST "http://localhost:8080/card-game/1/player/P1" -H "accept: application/json"**
+
+Response
+ ``` json lines 
+{ "description": "Waiting for opponent to join" }
+```
+
+### To fold the game 
+
+> Post **http://localhost:8080/card-game/1/player/P1/fold**
+>
+> with parameter as game type 1 for one card and 2 for 2 card and name of player
+
+> Request
+> **curl -X POST "http://localhost:8080/card-game/1/player/P1/fold" -H "accept: application/json"**
+
+Response
+ ``` json lines 
+{ "description": "Game folded by user: P1, waiting for other user" }
+```
+
+### To Show the game
+
+> Post **http://localhost:8080/card-game/1/player/P2/show**
+>
+> with parameter as game type 1 for one card and 2 for 2 card and name of player
+
+> Request
+> **curl -X POST "http://localhost:8080/card-game/1/player/P2/show" -H "accept: application/json"**
+
+Response example
+ ``` json lines 
+{ "description": "P2 wins the game other player folded..!!" }
+```
